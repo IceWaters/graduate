@@ -393,7 +393,7 @@ public class Network {
 	/**
 	 * 设置每个节点的子节点数目，包括直接相连与间接相连
 	 */
-	private void setChildrenNum() {
+	public void setChildrenNum() {
 		nodeSet = nodePool.getNodeSet();
 		Node rootNode = nodePool.getNodeWithID(0);
 		for (Node node : nodeSet) {
@@ -413,6 +413,7 @@ public class Network {
 		for (Node node : nodeSet) {
 			int num = findChildrenNum(node);
 			node.setChildrenNum(num);
+			node.setWeight(num);
 		}
 	}
 

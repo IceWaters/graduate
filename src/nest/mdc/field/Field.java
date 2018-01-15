@@ -350,20 +350,7 @@ public class Field extends JFrame {
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException {
 		Field field = new Field();
 		System.out.println(nodePool.getNodeNum());
-		rootNode = nodePool.getNodeWithID(0);
-
-		// System.out.println(rootNode.getXCoordinate() + " " +
-		// rootNode.getYCoordinate());
-
-		// try {
-		// timeclassifier timeclassifier1 = new
-		// timeclassifier(nodePool.getNodeList());
-		// field.testRedundantNode(50, timeclassifier1);
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
-		
+		rootNode = nodePool.getNodeWithID(0);		
 		
         //路由构造
 		MyRouting routing = new MyRouting(nodePool);
@@ -375,62 +362,21 @@ public class Field extends JFrame {
 		}
 		//
 		timeclassifier timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runAlgXXX();
+		timeclassifier1.runAlgXxxWithOneCharger();	
 		
-//		switch (2) {
-//		case 1:
-//			field.drawNeighbor();
-//			routing.testFlow();
-//			break;
-//		case 2:
-//			network.setHopNum();
-//			// System.out.println("hop");
-//			// field.drawHop(5);
-//			routing.testFlowOfPriority();
-//			break;
-//		case 3:
-//			routing.testFlowOfArea();
-//			break;
-//		case 4:
-//			routing.testFlowOfSA();
-//			break;
-//		case 5:
-//			routing.testFlowOfSA2();
-//			break;
-//		default:
-//			break;
-//		}
-
-		// for (KCluster kCluster6 : oArrayList) {
-		// Color[] aColors = {Color.BLACK, Color.BLUE,Color.green,Color.red};
-		// Random random = new Random();
-		// int i = random.nextInt(4);
-		// for (Node node : kCluster6.getNodeSet()) {
-		// display.drawPoint(node, 8 , aColors[i]);
-		// }
-		// }
-		// Map<KCluster, ArrayList<KCluster>> mmMap =
-		// timeclassifier1.getClusterMap();
-		// for (KCluster kCluster : oArrayList) {
-		// ArrayList<KCluster> tArrayList = mmMap.get(kCluster);
-		// Color[] aColors = {Color.BLACK,
-		// Color.BLUE,Color.CYAN,Color.gray,Color.green,Color.red,Color.orange,Color.PINK};
-		// Random random = new Random();
-		// for (KCluster kCluster2 : tArrayList) {
-		// if (kCluster2.getNodeSet().size() == 1) {
-		// for (Node node : kCluster2.getNodeSet()) {
-		// display.drawPoint(node, 10, Color.RED);
-		// }
-		// }
-		// int i = random.nextInt(8) ;
-		// ArrayList<Node> daArrayList = new
-		// ArrayList<>(kCluster2.getNodeSet());
-		// display.drawLine(daArrayList, 1, aColors[i]);
-		// }
-		// }
-
+		field.clearChildren();
+		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runAlgXxxWithOneCharger();
+	}
+	
+	
+	void clearChildren() {
+		for(Node node : nodePool.getNodeSet())
+			node.clearChildren();
 	}
 }
+
 
 class ServiceStation extends Point {
 	private double X;

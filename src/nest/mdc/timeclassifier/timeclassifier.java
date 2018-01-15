@@ -415,6 +415,7 @@ public class timeclassifier {
 		File file = new File("./file.txt");// 将结果打印到txt文本中
 		FileOutputStream fos = new FileOutputStream(file);
 		PrintStream p = new PrintStream(fos);
+		int temp = 8;
 
 		double min = 0; // 
 		double max = 0;//最大的传输通信量
@@ -465,14 +466,7 @@ public class timeclassifier {
 			}
 		}
 
-		// 将分类结果打印在txt文档中
-		p.println("\n分类结果：");
-		for (int i = 0; i < originalCluster.size(); i++) {
-			p.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
-					+ (double)  Math.pow(energyParameter, m - i) + "] : "
-					+ originalCluster.get(m - i - 1).getNodeSet().size());
-		}
-		p.close();
+		
 
 		// 补充刚开始的几个空类，添加无用点
 		for (int i = 0; i < m; i++) {
@@ -486,7 +480,32 @@ public class timeclassifier {
 			}
 			// count++;
 		}
-
+		// 将分类结果打印在txt文档中
+		p.println("\n分类结果：");
+		for (int i = 0; i < originalCluster.size(); i++) {
+			p.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
+					+ (double)  Math.pow(energyParameter, m - i) + "] : "
+					+ originalCluster.get(m - i - 1).getNodeSet().size());
+		}
+		
+		for (int i = 0; i < temp - m; i++) {
+			KCluster clusterTemp = new KCluster();
+			Node node2 = new Node(0, 0, 2000 + i);
+			// System.out.println((int)Math.pow(2,i));
+			node2.setChargingPeriod((int) Math.pow(2, i));
+			clusterTemp.addNode(node2);
+			originalCluster.add(clusterTemp);			
+			// count++;
+		}
+		
+		// 将分类结果打印在txt文档中
+		p.println("\n分类结果：");
+		for (int i = 0; i < originalCluster.size(); i++) {
+			p.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
+					+ (double)  Math.pow(energyParameter, m - i) + "] : "
+					+ originalCluster.get(m - i - 1).getNodeSet().size());
+		}
+		p.close();
 		// for (KCluster cluster : originalCluster) {
 		// for (Node node2 : cluster.getNodeSet()) {
 		// System.out.print(node2.getChildrenNum() + ":" +
