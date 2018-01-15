@@ -357,6 +357,16 @@ public class Node extends Point {
 			nextSet.clear();
 		}
 	}
+	
+	public Object clone(){
+        try{
+            Node copy=(Node)super.clone();
+            return copy;
+        }catch (CloneNotSupportedException e){
+            System.out.println("can not clone");
+        }
+        return null;
+    }
 }
 
 /**
@@ -412,6 +422,8 @@ class RechargeableNode extends Node {
 	int getEDC() {
 		return EDC;
 	}
+	
+	
 }
 
 /// *路由表类，包含到某个目的节点怎么走的信息*/

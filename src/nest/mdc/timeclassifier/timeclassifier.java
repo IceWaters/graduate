@@ -147,7 +147,7 @@ public class timeclassifier {
 			clusterSet = classifier.getClusters();// 2分K均值聚类的结果
 			double totalTime = 0;// 每天完成充电节点的任务的总时间花费
 			// 在族之间进行简化的tspn运算，得到族与族之间的路由顺序
-			Set<Node> tspnNodeSet = new HashSet();
+			Set<Node> tspnNodeSet = new HashSet<Node>();
 			for (KCluster kCluster : clusterSet) {// 得到每个族中距离基站最近的节点
 				tspnNodeSet.add(kCluster.getTspnNode());
 			}
@@ -155,7 +155,7 @@ public class timeclassifier {
 			Set<CollectionNode> cNodes2 = new HashSet<>();
 			TspVersion2 tVersion2 = new TspVersion2(tspnNodeSet, cNodes2);
 			NewTsp nTsp = new NewTsp(tVersion2.convertToTspNode());
-			ArrayList<Node> nList = new ArrayList<>();
+			ArrayList<Node> nList = new ArrayList<Node>();
 			nList = nTsp.startTsp();
 			for (int i = 0; i < nList.size() - 1; i++) {
 				totalTime += nList.get(i).getDistance(nList.get(i + 1)) / workerSpeed;

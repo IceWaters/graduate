@@ -14,6 +14,7 @@ public class Point {
 
 	private double X = -1;
 	private double Y = -1;
+	private double angle;
 
 	
 	/*¹¹Ôìº¯Êý*/
@@ -63,6 +64,18 @@ public class Point {
 	    return Math.sqrt(Math.pow((this.X-a.X),2)+Math.pow((this.Y-a.Y),2));
 	}
 	
+	public double getAngle(){
+	    return this.angle;
+	}
 	
+	public void setAngle(Point start){
+        double ydist=Math.abs(this.Y-start.getYCoordinate());
+        double xdist=Math.abs(this.X-start.getXCoordinate());
+        if(xdist==0){
+            this.angle=0;
+        }else {
+            this.angle = Math.atan(ydist / xdist);
+        }
+    }
 
 }
