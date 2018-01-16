@@ -13,8 +13,11 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,6 +31,9 @@ import nest.mdc.network.CollectionNode;
 import nest.mdc.network.Node;
 import nest.mdc.network.NodePool;
 import nest.mdc.network.Point;
+import nest.mdc.uav.Route;
+import nest.mdc.uav.RouteWithoutDepot;
+import nest.mdc.uav.Sweep;
 
 public class timeclassifier {
 	private NodePool nodePool;
@@ -40,7 +46,14 @@ public class timeclassifier {
 	final private int workerSpeed = 1;// 工人的行进速度，单位：米每秒
 	final private double chargingTime = 100;// 每个传感器充电时间，单位：秒
 	final private int T = 64;
-
+	
+	
+	//UAV
+	private final int uavNumber = 5;
+	private final int uavSpeed = 20;
+	private HashMap<RouteWithoutDepot, Integer> hashMap = new HashMap<>();//调度的结果保存在Map之中,Integer值标识了无人机的id
+    private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap = new HashMap<>();//调度结果的另一种保存方式，更换了Key与Value
+	
 	/**
 	 * constructor
 	 * 
@@ -488,23 +501,23 @@ public class timeclassifier {
 					+ originalCluster.get(m - i - 1).getNodeSet().size());
 		}
 		
-		for (int i = 0; i < temp - m; i++) {
-			KCluster clusterTemp = new KCluster();
-			Node node2 = new Node(0, 0, 2000 + i);
-			// System.out.println((int)Math.pow(2,i));
-			node2.setChargingPeriod((int) Math.pow(2, i));
-			clusterTemp.addNode(node2);
-			originalCluster.add(clusterTemp);			
-			// count++;
-		}
-		
-		// 将分类结果打印在txt文档中
-		p.println("\n分类结果：");
-		for (int i = 0; i < originalCluster.size(); i++) {
-			p.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
-					+ (double)  Math.pow(energyParameter, m - i) + "] : "
-					+ originalCluster.get(m - i - 1).getNodeSet().size());
-		}
+//		for (int i = 0; i < temp - m; i++) {
+//			KCluster clusterTemp = new KCluster();
+//			Node node2 = new Node(0, 0, 2000 + i);
+//			// System.out.println((int)Math.pow(2,i));
+//			node2.setChargingPeriod((int) Math.pow(2, i));
+//			clusterTemp.addNode(node2);
+//			originalCluster.add(clusterTemp);			
+//			// count++;
+//		}
+//		
+//		// 将分类结果打印在txt文档中
+//		p.println("\n分类结果：");
+//		for (int i = 0; i < originalCluster.size(); i++) {
+//			p.println("(" + (double)Math.pow(energyParameter, temp - i -1) + ","
+//					+ (double)  Math.pow(energyParameter, temp - i) + "] : "
+//					+ originalCluster.get(temp - i - 1).getNodeSet().size());
+//		}
 		p.close();
 		// for (KCluster cluster : originalCluster) {
 		// for (Node node2 : cluster.getNodeSet()) {
@@ -633,5 +646,126 @@ public class timeclassifier {
 		System.out.println("最大时间花费在第" + maxTimeDay + "天 为：" + maxTime);
 		System.out.println("averagetime :" + averageTime / nodeSet.size());
 	}
+	
+	public void runMyAlgrWithUAV() throws FileNotFoundException {
+		initialOriginalCluster(); // 将节点按充电速率分为若干个大类
+		initClusterMap(); // 将大类分成小类，这里要注意对于不同的大类其分成小类的个数也不一样
+		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
+		double distance = 0;
+		double totalTime = 0;
+		for (Set<Node> set : nodeSet) {
+		//	Sweep 
+			Node start = nodePool.getNodeWithID(0);
+			Sweep  mySweep = new Sweep(start);
+			ArrayList<RouteWithoutDepot> routeWithoutDepots = mySweep.initialize(set);//得到无人机飞行路径
+			for (int i = 0; i < routeWithoutDepots.size(); i++) {
+				distance += routeWithoutDepots.get(i).getDistance();
+			}
+			System.out.print("距离 : " + distance);
+			doSchedule(routeWithoutDepots);
+			totalTime += getAllCost();				
+			System.out.print("\t时间 : " + totalTime + " \n");
+		}
+		System.out.println("总共距离 : " + distance);
+		System.out.println("总共时间 : " + totalTime);
+	}
+	
+	/**
+	 * 进行无人机的调度规划
+	 * @param routes
+	 */
+	private void doSchedule(ArrayList<RouteWithoutDepot> routes){
+		//Bin packing problem 集装箱问题，贪心算法求解即可
+        if (routes.size() <= uavNumber) {
+        	//无人机的数量大于等于routes的数量，直接分配即可
+            for (int i = 0; i < routes.size(); i++) {
+                hashMap.put(routes.get(i), i);
+            }
+        } else {
+        	//无人机数量小于routes的数量，意味着有的无人机需要跑2个或者以上的routes
+            //将routes里面的UAVRoute排序，这里我们需要降序,默认是升序排序，需要重新给定比较器
+            Collections.sort(routes, new Comparator<RouteWithoutDepot>() {
+                public int compare(RouteWithoutDepot o1, RouteWithoutDepot o2) {
+                    if (o1.getDistance() > o2.getDistance()) {
+                        return -1;
+                    }
+                    if (o1.getDistance() < o2.getDistance()) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            });
+
+            // 表示平均每个无人机需要访问的UAVRoute的个数
+            //int times = (int) routes.size() / uavNumber + 1;
+            //选出路径长度最长的uavNumber条路径并派遣无人机对这些路径并发访问，最先回到基地的无人机更换电池之后继续分配UAVRoute访问
+
+            //以下为简易实现算法
+            int n = 0;//无人机id
+            int tag = 0;//标记
+            for (int i = 0; i < routes.size(); i++) {
+                if (tag % 2 == 0) {
+                    hashMap.put(routes.get(i), n);
+                    n++;
+                    if (n == uavNumber) {
+                        tag++;
+                    }
+                } else {
+                    n--;
+                    hashMap.put(routes.get(i), n);
+                    if (n == 0) {
+                        tag++;
+                    }
+                }
+            }
+            
+//            int uavId = 0;//无人机id
+//            for (int i = 0; i < uavNumber; i++) {
+//                hashMap.put(routes.get(i), i);
+//            }
+//            for(int i = uavNumber; i < routes.size(); i++) {
+//            	double now = routes.get(uavNumber).getDistance();
+//                double pre = 0;
+//            }
+            
+        }
+        
+        //把hashmap中保存的结果转存入integerSetHashMap
+        Iterator iterator = hashMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            Object key = entry.getKey();//UAVRoute
+            Object value = entry.getValue();//Integer
+            if (!integerSetHashMap.containsKey((Integer) value)) {
+                Set<RouteWithoutDepot> set = new HashSet<RouteWithoutDepot>();
+                set.add((RouteWithoutDepot) key);
+                integerSetHashMap.put((Integer) value, set);
+            } else {
+                integerSetHashMap.get((Integer) value).add((RouteWithoutDepot) key);
+            }
+        }
+    }
+	
+	
+
+   /**
+    * 无人机并行完成这些任务，计算从所有无人机起飞到完成访问的最长的时间即可,无人机更换的电池的时间忽略
+    * @return
+    */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public double getAllCost(){
+        double maxCost = 0;
+        Set<Map.Entry<Integer, Set<RouteWithoutDepot>>> set = integerSetHashMap.entrySet();
+        for (Map.Entry entry : set) {
+            Set<RouteWithoutDepot> set1 = (Set<RouteWithoutDepot>) entry.getValue();
+            double cost = 0;
+            for (RouteWithoutDepot e : set1) {
+                cost = cost + e.getDistance() / uavSpeed;
+            }
+            if(maxCost < cost)
+            	maxCost = cost;
+        }
+        return maxCost;
+    }
 
 }

@@ -4,24 +4,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.Set;
 
 import nest.mdc.network.Node;
 public class Sweep {
-    private Random rand;
-    public final static int UAVCapacity = 600; 
-    public Sweep(Random rand){
-        this.rand=rand;
+	private Node start;
+    private final int UAVCapacity = 600; 
+    public Sweep(Node start){
+        this.start = start;
     }
-    public ArrayList<RouteWithoutDepot> initialize(ArrayList<Node> customers) {
+    
+    public ArrayList<RouteWithoutDepot> initialize(Set<Node> customers) {
         ArrayList<Node> customersCopy=new ArrayList<Node>();
         ArrayList<RouteWithoutDepot> routes=new ArrayList<RouteWithoutDepot>();
         int finishedSize=0;
         int customerSize=customers.size();
         for(Node x:customers){
-            customersCopy.add((Node)x.clone());
+            customersCopy.add(x);
         }
-        Node start=customersCopy.get(rand.nextInt(customerSize));
-        for(Node node:customersCopy){
+        for(Node node : customersCopy){
             node.setAngle(start);
         }
         Collections.sort(customersCopy, new Comparator<Node>() {
