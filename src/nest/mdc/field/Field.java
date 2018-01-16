@@ -365,10 +365,10 @@ public class Field extends JFrame {
 //		timeclassifier1.runAlgXxxWithOneCharger();	
 		timeclassifier1.runMyAlgrWithUAV();
 		
-//		field.clearChildren();
-//		network.setChildrenNum();
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-//		timeclassifier1.runAlgXxxWithOneCharger();
+		field.clearChildren();
+		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runAlgXxxWithOneCharger();
 	}
 	
 	

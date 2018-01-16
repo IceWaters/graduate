@@ -31,7 +31,6 @@ import nest.mdc.network.CollectionNode;
 import nest.mdc.network.Node;
 import nest.mdc.network.NodePool;
 import nest.mdc.network.Point;
-import nest.mdc.uav.Route;
 import nest.mdc.uav.RouteWithoutDepot;
 import nest.mdc.uav.Sweep;
 
@@ -51,8 +50,8 @@ public class timeclassifier {
 	//UAV
 	private final int uavNumber = 5;
 	private final int uavSpeed = 20;
-	private HashMap<RouteWithoutDepot, Integer> hashMap = new HashMap<>();//调度的结果保存在Map之中,Integer值标识了无人机的id
-    private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap = new HashMap<>();//调度结果的另一种保存方式，更换了Key与Value
+	private HashMap<RouteWithoutDepot, Integer> hashMap;//调度的结果保存在Map之中,Integer值标识了无人机的id
+    private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap;//调度结果的另一种保存方式，更换了Key与Value
 	
 	/**
 	 * constructor
@@ -676,6 +675,8 @@ public class timeclassifier {
 	 */
 	private void doSchedule(ArrayList<RouteWithoutDepot> routes){
 		//Bin packing problem 集装箱问题，贪心算法求解即可
+		hashMap = new HashMap<>();
+		integerSetHashMap = new HashMap<>();
         if (routes.size() <= uavNumber) {
         	//无人机的数量大于等于routes的数量，直接分配即可
             for (int i = 0; i < routes.size(); i++) {
