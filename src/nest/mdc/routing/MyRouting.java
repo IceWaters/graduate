@@ -3,6 +3,7 @@ package nest.mdc.routing;
 import java.util.HashSet;
 import java.util.Set;
 
+import nest.mdc.field.Field;
 import nest.mdc.network.Network;
 import nest.mdc.network.Node;
 import nest.mdc.network.NodePool;
@@ -40,14 +41,17 @@ public class MyRouting {
 					if(tempNode.getNodeID() != 0) {
 						//基站不需要充电
 						double tempWeight = tempNode.getWeight() + 1.0;
-						weight += tempWeight;
+						//weight += tempWeight;
 						
 						
 						int expo = (int) ((int)Math.log(tempWeight)/Math.log(2));
-						weight += Math.abs(tempWeight * (tempWeight - Math.pow(2, expo)) / Math.pow(2, expo));
-	//					if(Math.abs(Math.pow(2, Math.log(tempWeight)/Math.log(2)) - tempWeight) < 0.000000001)
-	//						//再加一个子节点时，如果
-	//						weight =+ tempWeight;
+						
+						if(Math.abs(Math.pow(2, expo) - tempWeight) < 0.000000001) {
+							//再加一个子节点时，如果
+						//	System.out.println("");
+							weight += Math.pow(Field.iNodeSum, expo + 2);
+						}else
+							weight += Math.pow(Math.abs(Field.iNodeSum * (tempWeight - Math.pow(2, expo)) / Math.pow(2, expo)), 2);
 					}									
 					tempNode = tempNode.getParent();
 				}

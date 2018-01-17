@@ -9,7 +9,7 @@ import java.util.Set;
 import nest.mdc.network.Node;
 public class Sweep {
 	private Node start;
-    private final int UAVCapacity = 600; 
+    private final int UAVCapacity = 4000; 
     public Sweep(Node start){
         this.start = start;
     }
@@ -38,6 +38,7 @@ public class Sweep {
         });
         while(finishedSize!=customerSize){
             RouteWithoutDepot newRoute=new RouteWithoutDepot();
+            newRoute.addPoint(start);
             while(newRoute.getDistance()<UAVCapacity){
                 try {
                     Node TryAdd = customersCopy.get(0);

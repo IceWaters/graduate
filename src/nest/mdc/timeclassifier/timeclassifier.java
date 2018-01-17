@@ -44,12 +44,12 @@ public class timeclassifier {
 	private int energyParameter;// esync算法中的参数
 	final private int workerSpeed = 1;// 工人的行进速度，单位：米每秒
 	final private double chargingTime = 100;// 每个传感器充电时间，单位：秒
-	final private int T = 64;
+	final private int T = 128;
 	
 	
 	//UAV
-	private final int uavNumber = 5;
-	private final int uavSpeed = 20;
+	private final int uavNumber = 2;
+	private final int uavSpeed = 1;
 	private HashMap<RouteWithoutDepot, Integer> hashMap;//调度的结果保存在Map之中,Integer值标识了无人机的id
     private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap;//调度结果的另一种保存方式，更换了Key与Value
 	
@@ -380,8 +380,8 @@ public class timeclassifier {
 					}
 				}
 				//
-				// if(tCluster != null && chooseClusters.size() != 0)
-				tCluster = chooseKclucster(chooseClusters, tCluster);
+				if(tCluster != null && chooseClusters.size() != 0)
+					tCluster = chooseKclucster(chooseClusters, tCluster);
 				tCluster.addTag();
 				if (tCluster.getNodeSet() != null) {
 					// System.out.println(tCluster.getNodeSet());
@@ -427,7 +427,7 @@ public class timeclassifier {
 		File file = new File("./file.txt");// 将结果打印到txt文本中
 		FileOutputStream fos = new FileOutputStream(file);
 		PrintStream p = new PrintStream(fos);
-		int temp = 8;
+		int temp = 5;
 
 		double min = 0; // 
 		double max = 0;//最大的传输通信量
@@ -442,6 +442,7 @@ public class timeclassifier {
 
 
 		int m = (int) (Math.log(max) / Math.log((double) 2)) + 1; // 分类区间数目
+	//	m = 9;
 		int[] sort = new int[m];
 		for (int i = 0; i < m; i++)
 			sort[i] = 0;
@@ -462,7 +463,7 @@ public class timeclassifier {
 			if (pcr >= min && pcr <= 1.0) {
 				// 当耗电速率在第一个区间内
 				originalCluster.get(m - 1).addNode(node);
-				node.setChargingPeriod((int) Math.pow(energyParameter, m - 1));
+				node.setChargingPeriod((int) Math.pow(energyParameter, temp - 1));
 				sort[0]++;
 			} else {
 				// 循环求出耗电速率区间
@@ -470,7 +471,7 @@ public class timeclassifier {
 					if (pcr > Math.pow(energyParameter, m - i - 1)
 							&& pcr <= Math.pow(energyParameter, m - i)) {
 						originalCluster.get(m - i - 1).addNode(node);
-						node.setChargingPeriod((int) Math.pow(energyParameter, m - i - 1));
+						node.setChargingPeriod((int) Math.pow(energyParameter, temp - i - 1));
 						sort[i]++;
 						break;
 					}
@@ -493,11 +494,34 @@ public class timeclassifier {
 			// count++;
 		}
 		// 将分类结果打印在txt文档中
-		p.println("\n分类结果：");
+		System.out.println("\n分类结果：");
 		for (int i = 0; i < originalCluster.size(); i++) {
-			p.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
+			System.out.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
 					+ (double)  Math.pow(energyParameter, m - i) + "] : "
 					+ originalCluster.get(m - i - 1).getNodeSet().size());
+		}
+						
+		if(originalCluster.size() != temp) {
+			ArrayList<KCluster> tempCluster = new ArrayList<>();
+			for (int i = 0; i < temp - m; i++) {
+				KCluster clusterTemp = new KCluster();
+				Node node2 = new Node(0, 0, 2000 + i);
+				// System.out.println((int)Math.pow(2,i));
+				node2.setChargingPeriod((int) Math.pow(2, i));
+				clusterTemp.addNode(node2);
+				tempCluster.add(clusterTemp);
+			}
+			for(int i = temp - m; i < temp; i++) {
+				tempCluster.add(originalCluster.get(i - temp + m));
+			}
+			originalCluster = tempCluster;
+			// 将分类结果打印在txt文档中
+			System.out.println("\n分类结果：");
+			for (int i = 0; i < originalCluster.size(); i++) {
+				System.out.println("(" + (double)Math.pow(energyParameter, temp - i -1) + ","
+						+ (double)  Math.pow(energyParameter, temp - i) + "] : "
+						+ originalCluster.get(temp - i - 1).getNodeSet().size());
+			}
 		}
 		
 //		for (int i = 0; i < temp - m; i++) {
@@ -506,17 +530,11 @@ public class timeclassifier {
 //			// System.out.println((int)Math.pow(2,i));
 //			node2.setChargingPeriod((int) Math.pow(2, i));
 //			clusterTemp.addNode(node2);
-//			originalCluster.add(clusterTemp);			
+//			originalCluster.add(0, clusterTemp);			
 //			// count++;
 //		}
 //		
-//		// 将分类结果打印在txt文档中
-//		p.println("\n分类结果：");
-//		for (int i = 0; i < originalCluster.size(); i++) {
-//			p.println("(" + (double)Math.pow(energyParameter, temp - i -1) + ","
-//					+ (double)  Math.pow(energyParameter, temp - i) + "] : "
-//					+ originalCluster.get(temp - i - 1).getNodeSet().size());
-//		}
+		
 		p.close();
 		// for (KCluster cluster : originalCluster) {
 		// for (Node node2 : cluster.getNodeSet()) {
@@ -635,13 +653,14 @@ public class timeclassifier {
 			}
 			totalTime += tspDistance / workerSpeed;
 			averageTime += totalTime;
-			System.out.println("第" + day + "天 one charger :" + totalTime);
+//			System.out.println("第" + day + "天 one charger :" + totalTime);
 			if (totalTime > maxTime) {
 				maxTime = totalTime;
 				maxTimeDay = day;
 			}
 			day++;
 		}
+		System.out.println("天数:" + day);
 		System.out.println("最大时间花费在第" + maxTimeDay + "天 为：" + maxTime);
 		System.out.println("averagetime :" + averageTime / nodeSet.size());
 	}
@@ -652,21 +671,41 @@ public class timeclassifier {
 		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
 		double distance = 0;
 		double totalTime = 0;
+		int day = 0;
 		for (Set<Node> set : nodeSet) {
 		//	Sweep 
+			Set<Node> removeElements = new HashSet<>();
+			for (Node node : set) {
+				if (node.getNodeID() >= 1000)
+					removeElements.add(node);
+			}
+			set.removeAll(removeElements);
 			Node start = nodePool.getNodeWithID(0);
 			Sweep  mySweep = new Sweep(start);
 			ArrayList<RouteWithoutDepot> routeWithoutDepots = mySweep.initialize(set);//得到无人机飞行路径
+			for(Node node : set)
+				System.out.print(node.getNodeID() + " ");
+			System.out.println();
 			for (int i = 0; i < routeWithoutDepots.size(); i++) {
 				distance += routeWithoutDepots.get(i).getDistance();
+				ArrayList<Node> route = routeWithoutDepots.get(i).getRoute();
+				System.out.print("[");
+				for(int j = 0; j < route.size(); j++) {
+					System.out.print(route.get(j).getNodeID() + " ");
+				}
+				System.out.print("]  ");
 			}
-			System.out.print("距离 : " + distance);
+			System.out.println();
+//			System.out.print("距离 : " + distance);
 			doSchedule(routeWithoutDepots);
 			totalTime += getAllCost();				
-			System.out.print("\t时间 : " + totalTime + " \n");
+//			System.out.print("\t时间 : " + totalTime + " \n");
+			day++;
 		}
+		System.out.println("天数:" + day);
 		System.out.println("总共距离 : " + distance);
 		System.out.println("总共时间 : " + totalTime);
+		System.out.println("平均时间 : " + totalTime / nodeSet.size());
 	}
 	
 	/**

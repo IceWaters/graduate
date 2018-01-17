@@ -45,12 +45,12 @@ public class Field extends JFrame {
 
 	static {
 		// 基本网络参数
-		iNodeSum = 200;
+		iNodeSum = 30;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
 		iMinY = 0;
-		Node.commRange = 150;
+		Node.commRange = 300;
 	}
 
 	{
@@ -80,54 +80,29 @@ public class Field extends JFrame {
 		System.out.println();
 	}
 
-	/**
-	 * 测试在不同地形图下，算法结果的改变情况
-	 * 
-	 * @param name
-	 *            ： 地形图的名称
-	 * @throws IOException
-	 */
-	void testLandform(String name) throws IOException {
-		ReadLandform readLandform = new ReadLandform(name);
-		display.drawLandform(Field.iMaxX, Field.iMaxY, readLandform.getLandform());
-		nodePool.addCenterNode(rootNode);// 初始化网络时，需要将中心基站，即根节点加入节点池内
-		network = new Network(nodePool, readLandform.getLandform());
-		try {
-			Thread.sleep(100);
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		drawChildren();
-
-		nodePool.eraseNode(rootNode);
-		timeclassifier timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.initialOriginalCluster();
-		int power1 = 0;
-		double power2 = 0;
-		for (Node node : nodePool.getNodeSet()) {
-			// 计算能耗
-			power1 = power1 + node.getChildrenNum();
-			power2 = power2 + (double) (1 / (double) node.getChargingPeriod());
-		}
-		System.out.println("总能耗 ： " + power1);
-		System.out.println("总能耗 ： " + power2);
-		drawChargingPeriod(8);
-		double averageTime = 0;
-		int times = 15;
-		for (int i = 0; i < times; i++) {
-			System.out.print(i + " ");
-			averageTime += timeclassifier1.runAlgXXX();
-		}
-		System.out.println("\n多次平均时间为 ：" + averageTime / times);
-		testRedundantNode(500, timeclassifier1);
-	}
 
 	void drawNode(int size) {
 		Color[] aColors = { Color.BLACK, Color.gray, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
 				Color.yellow, Color.magenta, Color.pink, Color.darkGray };
 
+	}
+	
+	/**
+	 * 在图上表明节点的id
+	 */
+	void drawNodeId() {
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for (Node node : nodePool.getNodeSet()) {
+			if (node.getNodeID() == 0)
+				continue;
+
+			display.drawString(String.valueOf(node.getNodeID()), (int)node.getXCoordinate() + 5, (int)node.getYCoordinate());
+		}
 	}
 
 	/**
@@ -225,84 +200,7 @@ public class Field extends JFrame {
 
 	}
 
-	/**
-	 * 测试增加冗余节点后，节点的充电周期是否改变
-	 * 
-	 * @param redundantNodeNum
-	 *            ： 冗余节点总数
-	 * @param timeclassifier1
-	 *            ：
-	 * @throws IOException
-	 */
-	void testRedundantNode(int redundantNodeNum, timeclassifier timeclassifier1) throws IOException {
-
-		ArrayList<KCluster> oArrayList = timeclassifier1.getOriginalCluster();
-		drawChargingPeriod(5);
-
-		try {
-			drawChildren();
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// System.out.println("*******Original*********");
-		// for(KCluster cluster : oArrayList){
-		// for(Node node : cluster.getNodeSet()){
-		// System.out.println(node.getNodeID() + " : " +
-		// node.getChargingPeriod());
-		// }
-		// System.out.println("\n");
-		// }
-
-		RedundantNode redundantNode = new RedundantNode(redundantNodeNum, oArrayList);
-		// redundantNode.printResult();
-		drawChargingPeriod(5);
-		ArrayList<KCluster> kClusters = redundantNode.getClusters();
-		// System.out.println("*******after*********");
-		// System.out.println(kClusters.size());
-		// for(KCluster cluster : kClusters){
-		// for(Node node : cluster.getNodeSet()){
-		// System.out.println(i++ + " " + node.getNodeID() + " : " +
-		// node.getChargingPeriod());
-		// }
-		// System.out.println("\n");
-		// }
-
-		// int i = 0;
-		// KCluster cluster = kClusters.get(0);
-		// Node node = null;
-		// if(cluster != null){
-		// node = cluster.getRandomNode();
-		// }
-		// System.out.println(kClusters.size() + " the least : " +
-		// node.getChargingPeriod() + " " +
-		// (int)(Math.log(node.getChargingPeriod())/Math.log(2)));
-		// for(i = (int)(Math.log(node.getChargingPeriod())/Math.log(2)) - 1; i
-		// >= 0; i--){
-		// KCluster cluster2 = new KCluster();
-		// Node node2 = new Node(0,0, 1000 + i);
-		// // System.out.println((int)Math.pow(2,i));
-		// node2.setChargingPeriod((int)Math.pow(2,i));
-		// cluster2.addNode(node2);
-		// kClusters.add(0, cluster2);
-		// count++;
-		// }
-		//
-		// System.out.println("size : " + kClusters.size());
-
-		// for(i = 0; i < kClusters.size(); i++){
-		// System.out.println("*********");
-		// System.out.println(Math.pow(2, i) + " : " +
-		// kClusters.get(i).getNodeSet().size());
-		//// for(Node node2 :kClusters.get(i).getNodeSet()){
-		//// System.out.println(node2.getNodeID() + " : " +
-		// node2.getChargingPeriod());
-		//// }
-		// }
-		timeclassifier1.setOriginalClusters(kClusters);
-		timeclassifier1.runAlgXXX();
-	}
+	
 
 	void testTsp() {
 		Tsp tsp = new Tsp(nodePool);
@@ -356,6 +254,7 @@ public class Field extends JFrame {
 		MyRouting routing = new MyRouting(nodePool);
 		try {
 			field.drawChildren();
+			field.drawNodeId();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -363,6 +262,11 @@ public class Field extends JFrame {
 		//
 		timeclassifier timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 //		timeclassifier1.runAlgXxxWithOneCharger();	
+		timeclassifier1.runMyAlgrWithUAV();
+		
+		field.clearChildren();
+		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 		timeclassifier1.runMyAlgrWithUAV();
 		
 		field.clearChildren();
