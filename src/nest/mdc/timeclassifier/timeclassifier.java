@@ -27,6 +27,7 @@ import nest.mdc.cluster.Basic_Kmeans;
 import nest.mdc.cluster.Bisecting_k_means;
 import nest.mdc.cluster.Classifier;
 import nest.mdc.cluster.KCluster;
+import nest.mdc.field.Field;
 import nest.mdc.network.CollectionNode;
 import nest.mdc.network.Node;
 import nest.mdc.network.NodePool;
@@ -47,8 +48,7 @@ public class timeclassifier {
 	final private int T = 128;
 	
 	
-	//UAV
-	private final int uavNumber = 2;
+	//UAV参数
 	private final int uavSpeed = 1;
 	private HashMap<RouteWithoutDepot, Integer> hashMap;//调度的结果保存在Map之中,Integer值标识了无人机的id
     private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap;//调度结果的另一种保存方式，更换了Key与Value
@@ -427,7 +427,7 @@ public class timeclassifier {
 		File file = new File("./file.txt");// 将结果打印到txt文本中
 		FileOutputStream fos = new FileOutputStream(file);
 		PrintStream p = new PrintStream(fos);
-		int temp = 5;
+		int temp = 7;
 
 		double min = 0; // 
 		double max = 0;//最大的传输通信量
@@ -673,7 +673,6 @@ public class timeclassifier {
 		double totalTime = 0;
 		int day = 0;
 		for (Set<Node> set : nodeSet) {
-		//	Sweep 
 			Set<Node> removeElements = new HashSet<>();
 			for (Node node : set) {
 				if (node.getNodeID() >= 1000)
@@ -716,7 +715,7 @@ public class timeclassifier {
 		//Bin packing problem 集装箱问题，贪心算法求解即可
 		hashMap = new HashMap<>();
 		integerSetHashMap = new HashMap<>();
-        if (routes.size() <= uavNumber) {
+        if (routes.size() <= Field.uavNumber) {
         	//无人机的数量大于等于routes的数量，直接分配即可
             for (int i = 0; i < routes.size(); i++) {
                 hashMap.put(routes.get(i), i);
@@ -747,7 +746,7 @@ public class timeclassifier {
                 if (tag % 2 == 0) {
                     hashMap.put(routes.get(i), n);
                     n++;
-                    if (n == uavNumber) {
+                    if (n == Field.uavNumber) {
                         tag++;
                     }
                 } else {

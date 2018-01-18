@@ -3,13 +3,12 @@ package nest.mdc.uav;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Random;
 import java.util.Set;
 
+import nest.mdc.field.Field;
 import nest.mdc.network.Node;
 public class Sweep {
 	private Node start;
-    private final int UAVCapacity = 4000; 
     public Sweep(Node start){
         this.start = start;
     }
@@ -37,9 +36,9 @@ public class Sweep {
             }
         });
         while(finishedSize!=customerSize){
-            RouteWithoutDepot newRoute=new RouteWithoutDepot();
+            RouteWithoutDepot newRoute = new RouteWithoutDepot();
             newRoute.addPoint(start);
-            while(newRoute.getDistance()<UAVCapacity){
+            while(newRoute.getDistance() < Field.UAVCapacity){
                 try {
                     Node TryAdd = customersCopy.get(0);
                     newRoute.addPoint(TryAdd);
@@ -49,7 +48,7 @@ public class Sweep {
                     break;
                 }
             }
-            if(newRoute.getDistance()>=UAVCapacity){
+            if(newRoute.getDistance() >= Field.UAVCapacity){
                 Node PutBack=newRoute.getRoute().get(newRoute.getRoute().size()-1);
                 newRoute.deletePoint(PutBack);
                 finishedSize--;

@@ -10,13 +10,13 @@ import nest.mdc.network.NodePool;
 
 public class MyRouting {
 	private Set<Node> S = new HashSet<Node>();//已加入到生成树的点
-	private Set<Node> W = new HashSet<Node>();//临近点
-	private Set<Node> T = new HashSet<Node>();//剩下的点
+//	private Set<Node> W = new HashSet<Node>();//临近点
+//	private Set<Node> T = new HashSet<Node>();//剩下的点
 	private NodePool nodePool;
 	
 	public MyRouting(NodePool nodePool) {
 		this.nodePool = nodePool;
-		T = nodePool.getNodeSet();
+//		T = nodePool.getNodeSet();
 		run();
 	}
 	
@@ -44,11 +44,10 @@ public class MyRouting {
 						//weight += tempWeight;
 						
 						
-						int expo = (int) ((int)Math.log(tempWeight)/Math.log(2));
+						int expo = (int) (Math.log(tempWeight)/Math.log(2));
 						
-						if(Math.abs(Math.pow(2, expo) - tempWeight) < 0.000000001) {
-							//再加一个子节点时，如果
-						//	System.out.println("");
+						if(Math.abs(Math.pow(2, expo) - tempWeight) < 0.0001) {
+							//再加一个子节点时，通信量正好是2的指数倍
 							weight += Math.pow(Field.iNodeSum, expo + 2);
 						}else
 							weight += Math.pow(Math.abs(Field.iNodeSum * (tempWeight - Math.pow(2, expo)) / Math.pow(2, expo)), 2);
@@ -63,7 +62,7 @@ public class MyRouting {
 						flag = true;
 					else
 						flag = false;
-					for(Node neighbor : node.neighbors.get(1).getNeig()) {
+					for(Node neighbor : node.neighbors.get(1).getNeig()) {  
 						if(!S.contains(neighbor)) {
 							//从不存在于S中的所有邻居点中，挑选出距离最近的距离点
 							double tempDistance = Network.distanceMap2[node.getNodeID()][neighbor.getNodeID()];

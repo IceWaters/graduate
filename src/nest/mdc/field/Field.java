@@ -13,14 +13,10 @@ import nest.mdc.algorithm.Algorithm;
 import nest.mdc.algorithm.Tsp;
 import nest.mdc.cluster.KCluster;
 import nest.mdc.display.Display;
-import nest.mdc.landform.ReadLandform;
 import nest.mdc.network.Network;
 import nest.mdc.network.Node;
 import nest.mdc.network.NodePool;
-import nest.mdc.network.Point;
-import nest.mdc.redundant.RedundantNode;
 import nest.mdc.routing.MyRouting;
-import nest.mdc.routing.Routing;
 import nest.mdc.timeclassifier.timeclassifier;
 
 /**
@@ -32,12 +28,12 @@ import nest.mdc.timeclassifier.timeclassifier;
 public class Field extends JFrame {
 	public static int iNodeSum; // 网络中的节点数
 	public static int iMaxX, iMinX, iMaxY, iMinY; // 网络大小
+	public static int UAVCapacity;
+	public static int uavNumber;
 	public static Display display = null;
 	private static Network network = null;
 	static NodePool nodePool = null;
-	private ServiceStation serviceStation;
 	private static Node rootNode;
-	private final double stationX, stationY; // 基站位置
 	public static int distanceWeight1 = 30, distanceWeight2 = 30;
 	public static int weight1 = 1, weight2 = 1;
 	public static int clusterSize = 0;
@@ -45,19 +41,16 @@ public class Field extends JFrame {
 
 	static {
 		// 基本网络参数
-		iNodeSum = 30;
+		iNodeSum = 80;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
 		iMinY = 0;
-		Node.commRange = 300;
+		Node.commRange = 600;
+		UAVCapacity = 2500;
+		uavNumber = 2;
 	}
 
-	{
-		// 基站位置设定
-		stationX = 0;
-		stationY = 0;
-	}
 
 	/**
 	 * Constructor
@@ -68,7 +61,6 @@ public class Field extends JFrame {
 		nodePool = new NodePool();
 		network = new Network(nodePool);
 		display = new Display(nodePool);
-		serviceStation = new ServiceStation(stationX, stationY);
 	}
 
 	void test() {
@@ -143,7 +135,6 @@ public class Field extends JFrame {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	void drawNeighbor() {
 		// Set<Node> nodeSet = nodePool.getNodeSet();
 		Node node = nodePool.getNodeWithID(0);
@@ -282,12 +273,3 @@ public class Field extends JFrame {
 	}
 }
 
-
-class ServiceStation extends Point {
-	private double X;
-	private double Y;
-
-	ServiceStation(double stationX, double stationY) {
-		super(stationX, stationY);
-	}
-}
