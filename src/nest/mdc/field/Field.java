@@ -31,6 +31,7 @@ public class Field extends JFrame {
 	public static int UAVCapacity;
 	public static int uavNumber;
 	public static Display display = null;
+	public static Display display2 = null;
 	private static Network network = null;
 	static NodePool nodePool = null;
 	private static Node rootNode;
@@ -38,17 +39,17 @@ public class Field extends JFrame {
 	public static int weight1 = 1, weight2 = 1;
 	public static int clusterSize = 0;
 	public static int count = 0;
-
+    //工人的行进速度和无人机的飞行速度暂定一样
 	static {
 		// 基本网络参数
-		iNodeSum = 80;
+		iNodeSum = 150;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
 		iMinY = 0;
-		Node.commRange = 600;
-		UAVCapacity = 2500;
-		uavNumber = 2;
+		Node.commRange = 300;
+		UAVCapacity = 2400;//须大于从基地到最远点的来回距离
+		uavNumber = 4;
 	}
 
 
@@ -61,6 +62,7 @@ public class Field extends JFrame {
 		nodePool = new NodePool();
 		network = new Network(nodePool);
 		display = new Display(nodePool);
+//		display2 = new Display(nodePool);
 	}
 
 	void test() {
@@ -77,12 +79,13 @@ public class Field extends JFrame {
 		Color[] aColors = { Color.BLACK, Color.gray, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
 				Color.yellow, Color.magenta, Color.pink, Color.darkGray };
 
+		
 	}
 	
 	/**
 	 * 在图上表明节点的id
 	 */
-	void drawNodeId() {
+	void drawNodeId(Display display) {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
@@ -126,7 +129,7 @@ public class Field extends JFrame {
 	 * 
 	 * @throws IOException
 	 */
-	void drawChildren() throws IOException {
+	void drawChildren(Display display) throws IOException {
 		Set<Node> nodeSet = nodePool.getNodeSet();
 		for (Node node : nodeSet) {
 			Set<Node> childNodes = node.getChildren();
@@ -135,7 +138,7 @@ public class Field extends JFrame {
 		}
 	}
 
-	void drawNeighbor() {
+	void drawNeighbor(Display display) {
 		// Set<Node> nodeSet = nodePool.getNodeSet();
 		Node node = nodePool.getNodeWithID(0);
 		// System.out.println("neighbors : " + ((Set<Node>)
@@ -155,41 +158,48 @@ public class Field extends JFrame {
 	 * @param size
 	 *            ： 方块的大小
 	 */
-	public static void drawChargingPeriod(int size) {
+	public static void drawChargingPeriod(Display display, int size) {
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Color[] aColors = { Color.BLACK, Color.gray, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
-				Color.yellow, Color.magenta, Color.pink, Color.darkGray };
-		int maxCharingPeriod = 0;
-		// for (Node node : nodePool.getNodeSet()) {
-		// if (node.getChargingPeriod() > maxCharingPeriod)
-		// maxCharingPeriod = node.getChargingPeriod();
-		// }
-
-		// display.clearPicture();
+		Color[] aColors = { Color.BLACK, Color.yellow, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
+				Color.magenta, Color.pink, Color.darkGray };
 		display.drawPoint(rootNode, 2, aColors[0]);// the center point
 		for (Node node : nodePool.getNodeSet()) {
 			if (node.getNodeID() == 0)
 				continue;
-
-			int index = (int) (Math.log(node.getChargingPeriod()) / Math.log(2));
-			// 未添加冗余节点前·
-			// System.out.println(node.getNodeID() + " : " +
-			// node.getChargingPeriod());
-			// display.drawPoint(node, size, aColors[clusterSize - index - 1]);
-			display.drawPoint(node, size, aColors[index]);
-			// display.drawString(
-			// String.valueOf(node.getChildrenNum()) + "," +
-			// String.valueOf(node.getChargingPeriod()) + ","
-			// + String.valueOf(clusterSize - index - 1),
-			// (int) node.getXCoordinate(), (int) node.getYCoordinate());
+			int index = (int) (Math.log(node.getWeight()) / Math.log(2));		
+			display.drawPoint(node, size, aColors[index]);		
 		}
-
 	}
+	
+	/**
+	 * 根据充电周期的大小给点画上不同的方块,叶子节点的充电周期是一样的
+	 * 
+	 * @param size
+	 *            ： 方块的大小
+	 */
+	public static void drawChargingPeriod2(Display display, int size) {
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Color[] aColors = { Color.BLACK, Color.yellow, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
+				Color.magenta, Color.pink, Color.darkGray };
+		display.drawPoint(rootNode, 2, aColors[0]);// the center point
+		for (Node node : nodePool.getNodeSet()) {
+			if (node.getNodeID() == 0)
+				continue;
+			int index = (int) (Math.log(node.getChildrenNum()) / Math.log(2));		
+			display.drawPoint(node, size, aColors[index]);		
+		}
+	}
+
 
 	
 
@@ -240,30 +250,59 @@ public class Field extends JFrame {
 		Field field = new Field();
 		System.out.println(nodePool.getNodeNum());
 		rootNode = nodePool.getNodeWithID(0);		
-		
+		timeclassifier timeclassifier1;
         //路由构造
 		MyRouting routing = new MyRouting(nodePool);
 		try {
-			field.drawChildren();
-			field.drawNodeId();
+			field.drawChildren(display);
+			field.drawNodeId(display);
+			drawChargingPeriod(display,7);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		//
-		timeclassifier timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1.initialOriginalCluster();
 //		timeclassifier1.runAlgXxxWithOneCharger();	
-		timeclassifier1.runMyAlgrWithUAV();
 		
-		field.clearChildren();
-		network.setChildrenNum();
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runMyAlgrWithUAV();
-		
-		field.clearChildren();
-		network.setChildrenNum();
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		field.clearChildren();
+//		routing = new MyRouting(nodePool);
+//		try {
+//			field.drawChildren();
+//			field.drawNodeId();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 		timeclassifier1.runAlgXxxWithOneCharger();
+		
+		field.clearChildren();
+		network.setChildrenNum();
+//		try {
+//			display2.clearPicture();
+//			field.drawChildren(display2);
+//			field.drawNodeId(display2);
+//			drawChargingPeriod2(display2, 7);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1.initialOriginalCluster();
+		//timeclassifier1.runMyAlgrWithUAV();
+		
+//		field.clearChildren();
+//		network.setChildrenNum();
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runAlgXxxWithOneCharger();
+		
+		//与多个充电工作者工作
+//		field.clearChildren();
+//		network.setChildrenNum();
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1.runAlgXXX();
+		
 	}
 	
 	

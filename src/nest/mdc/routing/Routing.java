@@ -587,7 +587,7 @@ public class Routing {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Field.drawChargingPeriod(5);// 在图上画出充电时间
+		//Field.drawChargingPeriod(5);// 在图上画出充电时间
 
 		// 计算平均时间
 		double averageTime = 0;

@@ -48,7 +48,7 @@ public class Sweep {
                     break;
                 }
             }
-            if(newRoute.getDistance() >= Field.UAVCapacity){
+            if(newRoute.getDistance() > Field.UAVCapacity){
                 Node PutBack=newRoute.getRoute().get(newRoute.getRoute().size()-1);
                 newRoute.deletePoint(PutBack);
                 finishedSize--;

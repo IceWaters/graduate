@@ -41,9 +41,6 @@ public class MyRouting {
 					if(tempNode.getNodeID() != 0) {
 						//基站不需要充电
 						double tempWeight = tempNode.getWeight() + 1.0;
-						//weight += tempWeight;
-						
-						
 						int expo = (int) (Math.log(tempWeight)/Math.log(2));
 						
 						if(Math.abs(Math.pow(2, expo) - tempWeight) < 0.0001) {

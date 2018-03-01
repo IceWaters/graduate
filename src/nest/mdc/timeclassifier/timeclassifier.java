@@ -44,12 +44,12 @@ public class timeclassifier {
 	// ArrayList<>();//存放每天的充电节点
 	private int energyParameter;// esync算法中的参数
 	final private int workerSpeed = 1;// 工人的行进速度，单位：米每秒
-	final private double chargingTime = 100;// 每个传感器充电时间，单位：秒
-	final private int T = 128;
+	final private double chargingTime = 1;// 每个传感器充电时间，单位：秒
+	//final private int T = 128;
 	
 	
 	//UAV参数
-	private final int uavSpeed = 1;
+	private final int uavSpeed = 1;//无人机的飞行速度
 	private HashMap<RouteWithoutDepot, Integer> hashMap;//调度的结果保存在Map之中,Integer值标识了无人机的id
     private HashMap<Integer, Set<RouteWithoutDepot>> integerSetHashMap;//调度结果的另一种保存方式，更换了Key与Value
 	
@@ -157,6 +157,7 @@ public class timeclassifier {
 			classifier.classify();// 2分k均值聚类
 			ArrayList<KCluster> clusterSet = new ArrayList<KCluster>();
 			clusterSet = classifier.getClusters();// 2分K均值聚类的结果
+			System.out.println("size : " + clusterSet.size());
 			double totalTime = 0;// 每天完成充电节点的任务的总时间花费
 			// 在族之间进行简化的tspn运算，得到族与族之间的路由顺序
 			Set<Node> tspnNodeSet = new HashSet<Node>();
@@ -217,7 +218,7 @@ public class timeclassifier {
 			day++;
 			averageTime += totalTime;
 		}
-		averageTime = averageTime / T;
+		averageTime = averageTime / day;
 		System.out.println("最大时间花费在第" + maxTimeDay + "天 为：" + maxTime);
 		System.out.println("平均时间为 ：" + averageTime);
 		return averageTime;
@@ -633,9 +634,10 @@ public class timeclassifier {
 		// runAlgEsync();
 		initClusterMap(); // 将大类分成小类，这里要注意对于不同的大类其分成小类的个数也不一样
 		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
-		int day = 1;
+		int day = 0;
 		double averageTime = 0;
 		double maxTime = 0;
+		double distance = 0;
 		int maxTimeDay = 0;
 		for (Set<Node> set : nodeSet) {
 			double totalTime = 0;
@@ -651,6 +653,8 @@ public class timeclassifier {
 			for (int i = 0; i < nList.size() - 1; i++) {
 				tspDistance += nList.get(i).getDistance(nList.get(i + 1));
 			}
+			tspDistance += nList.get(0).getDistance(nList.get(nList.size() - 1));
+			distance += tspDistance;
 			totalTime += tspDistance / workerSpeed;
 			averageTime += totalTime;
 //			System.out.println("第" + day + "天 one charger :" + totalTime);
@@ -661,6 +665,8 @@ public class timeclassifier {
 			day++;
 		}
 		System.out.println("天数:" + day);
+		System.out.println("总共距离 : " + distance);
+		System.out.println("总共时间 : " + averageTime);
 		System.out.println("最大时间花费在第" + maxTimeDay + "天 为：" + maxTime);
 		System.out.println("averagetime :" + averageTime / nodeSet.size());
 	}
@@ -680,24 +686,24 @@ public class timeclassifier {
 			}
 			set.removeAll(removeElements);
 			Node start = nodePool.getNodeWithID(0);
-			Sweep  mySweep = new Sweep(start);
+			Sweep mySweep = new Sweep(start);
 			ArrayList<RouteWithoutDepot> routeWithoutDepots = mySweep.initialize(set);//得到无人机飞行路径
-			for(Node node : set)
-				System.out.print(node.getNodeID() + " ");
-			System.out.println();
+//			for(Node node : set)
+//				System.out.print(node.getNodeID() + " ");
+//			System.out.println();
 			for (int i = 0; i < routeWithoutDepots.size(); i++) {
 				distance += routeWithoutDepots.get(i).getDistance();
-				ArrayList<Node> route = routeWithoutDepots.get(i).getRoute();
-				System.out.print("[");
-				for(int j = 0; j < route.size(); j++) {
-					System.out.print(route.get(j).getNodeID() + " ");
-				}
-				System.out.print("]  ");
+//				ArrayList<Node> route = routeWithoutDepots.get(i).getRoute();
+//				System.out.print("[");
+//				for(int j = 0; j < route.size(); j++) {
+//					System.out.print(route.get(j).getNodeID() + " ");
+//				}
+//				System.out.print("]  ");
 			}
-			System.out.println();
+//			System.out.println();
 //			System.out.print("距离 : " + distance);
 			doSchedule(routeWithoutDepots);
-			totalTime += getAllCost();				
+			totalTime += getAllCostWithChargingtime();				
 //			System.out.print("\t时间 : " + totalTime + " \n");
 			day++;
 		}
@@ -757,16 +763,6 @@ public class timeclassifier {
                     }
                 }
             }
-            
-//            int uavId = 0;//无人机id
-//            for (int i = 0; i < uavNumber; i++) {
-//                hashMap.put(routes.get(i), i);
-//            }
-//            for(int i = uavNumber; i < routes.size(); i++) {
-//            	double now = routes.get(uavNumber).getDistance();
-//                double pre = 0;
-//            }
-            
         }
         
         //把hashmap中保存的结果转存入integerSetHashMap
@@ -789,6 +785,7 @@ public class timeclassifier {
 
    /**
     * 无人机并行完成这些任务，计算从所有无人机起飞到完成访问的最长的时间即可,无人机更换的电池的时间忽略
+    * 无人机到达节点后对节点的服务时间忽略不计
     * @return
     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -806,5 +803,26 @@ public class timeclassifier {
         }
         return maxCost;
     }
+    
+    /**
+     * 无人机并行完成这些任务，计算从所有无人机起飞到完成访问的最长的时间即可,无人机更换的电池的时间忽略
+     * 无人机到达节点后对节点的服务时间与其他的方法的服务时间相同
+     * @return
+     */
+     @SuppressWarnings({ "unchecked", "rawtypes" })
+ 	public double getAllCostWithChargingtime(){
+         double maxCost = 0;
+         Set<Map.Entry<Integer, Set<RouteWithoutDepot>>> set = integerSetHashMap.entrySet();
+         for (Map.Entry entry : set) {
+             Set<RouteWithoutDepot> set1 = (Set<RouteWithoutDepot>) entry.getValue();
+             double cost = 0;
+             for (RouteWithoutDepot e : set1) {
+                 cost = cost + e.getDistance() / uavSpeed + chargingTime * e.getRoute().size();
+             }
+             if(maxCost < cost)
+             	maxCost = cost;
+         }
+         return maxCost;
+     }
 
 }
