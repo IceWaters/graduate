@@ -262,5 +262,13 @@ public class NodePool {
 		}
 		return nodeSet;
 	}
+	
+	/**
+	 * 清空节点的子节点
+	 */
+	public void clearChildren() {
+		for(Node node : NodeSet)
+			node.clearChildren();
+	}
 
 }

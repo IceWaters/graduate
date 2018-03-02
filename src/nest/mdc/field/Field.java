@@ -8,6 +8,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import javax.swing.JFrame;
+import javax.xml.parsers.DocumentBuilder;
 
 import nest.mdc.algorithm.Algorithm;
 import nest.mdc.algorithm.Tsp;
@@ -202,9 +203,6 @@ public class Field extends JFrame {
 		}
 	}
 
-
-	
-
 	void testTsp() {
 		Tsp tsp = new Tsp(nodePool);
 		int[] tspPath = tsp.run();
@@ -254,7 +252,7 @@ public class Field extends JFrame {
 		rootNode = nodePool.getNodeWithID(0);		
 		timeclassifier timeclassifier1;
         //路由构造
-//		MyRouting routing = new MyRouting(nodePool);
+		MyRouting routing = new MyRouting(nodePool);
 //		try {
 //			field.drawChildren(display);
 //			field.drawNodeId(display);
@@ -276,9 +274,18 @@ public class Field extends JFrame {
 //			e.printStackTrace();
 //		}
 //		field.clearChildren();
-		network.setChildrenNum();
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runMyAlgrWithUAV();
+		double minTime = 1000000;
+		for(int i = 0; i < 10; i++) {
+			nodePool.clearChildren();
+			routing.run();
+			timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+			double time = timeclassifier1.runMyAlgrWithUAV();
+			if(minTime > time) {
+				minTime = time;
+				routing.setParentChildren();				
+			}
+			System.out.println(minTime);
+		}
 		
 //		field.clearChildren();
 //		network.setChildrenNum();
@@ -300,12 +307,12 @@ public class Field extends JFrame {
 //		timeclassifier1.initialOriginalCluster();
 		//timeclassifier1.runMyAlgrWithUAV();
 		
-		field.clearChildren();
-		network.setChildrenNum();
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runAlgXxxWithOneCharger();
+//		nodePool.clearChildren();
+//		network.setChildrenNum();
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1.runAlgXxxWithOneCharger();
 		
-		//与多个充电工作者工作
+
 //		field.clearChildren();
 //		network.setChildrenNum();
 //		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
@@ -314,9 +321,5 @@ public class Field extends JFrame {
 	}
 	
 	
-	void clearChildren() {
-		for(Node node : nodePool.getNodeSet())
-			node.clearChildren();
-	}
 }
 

@@ -674,7 +674,7 @@ public class timeclassifier {
 		System.out.println("averagetime :" + averageTime / nodeSet.size());
 	}
 	
-	public void runMyAlgrWithUAV() throws FileNotFoundException {
+	public double runMyAlgrWithUAV() throws FileNotFoundException {
 		initialOriginalCluster(); // 将节点按充电速率分为若干个大类
 		initClusterMap(); // 将大类分成小类，这里要注意对于不同的大类其分成小类的个数也不一样
 		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
@@ -714,10 +714,8 @@ public class timeclassifier {
 		System.out.println("平均时间 : " + totalTime / nodeSet.size());
 		
 		
-		
-		
-		
-		
+		return totalTime / nodeSet.size();
+					
 	}
 	
 	/**
