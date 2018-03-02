@@ -428,7 +428,7 @@ public class timeclassifier {
 		File file = new File("./file.txt");// 将结果打印到txt文本中
 		FileOutputStream fos = new FileOutputStream(file);
 		PrintStream p = new PrintStream(fos);
-		int temp = 7;
+		int temp = Field.period;
 
 		double min = 0; // 
 		double max = 0;//最大的传输通信量
@@ -631,7 +631,6 @@ public class timeclassifier {
 	 */
 	public void runAlgXxxWithOneCharger() throws FileNotFoundException {
 		initialOriginalCluster(); // 将节点按充电速率分为若干个大类
-		// runAlgEsync();
 		initClusterMap(); // 将大类分成小类，这里要注意对于不同的大类其分成小类的个数也不一样
 		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
 		int day = 0;
@@ -639,7 +638,11 @@ public class timeclassifier {
 		double maxTime = 0;
 		double distance = 0;
 		int maxTimeDay = 0;
+		Node start = nodePool.getNodeWithID(0);
 		for (Set<Node> set : nodeSet) {
+			if(set.size() == 0)
+				continue;
+			set.add(start);
 			double totalTime = 0;
 			// 不进行聚类，直接所有点tsp运算，使用一个充电器充电
 			Set<CollectionNode> cNodes2 = new HashSet<>();
@@ -648,7 +651,7 @@ public class timeclassifier {
 			ArrayList<Node> nList = new ArrayList<>();
 			nList = nTsp.startTsp();// 得到tsp运算后的结果
 			// 计算day天的充电时间
-			totalTime += set.size() * chargingTime;
+			totalTime += (set.size() - 1) * chargingTime;//除去基站的充电时间
 			double tspDistance = 0;
 			for (int i = 0; i < nList.size() - 1; i++) {
 				tspDistance += nList.get(i).getDistance(nList.get(i + 1));
@@ -678,20 +681,18 @@ public class timeclassifier {
 		double distance = 0;
 		double totalTime = 0;
 		int day = 0;
+		Node start = nodePool.getNodeWithID(0);
 		for (Set<Node> set : nodeSet) {
 			Set<Node> removeElements = new HashSet<>();
 			for (Node node : set) {
 				if (node.getNodeID() >= 1000)
 					removeElements.add(node);
 			}
-			set.removeAll(removeElements);
-			Node start = nodePool.getNodeWithID(0);
+			set.removeAll(removeElements);		
 			Sweep mySweep = new Sweep(start);
 			ArrayList<RouteWithoutDepot> routeWithoutDepots = mySweep.initialize(set);//得到无人机飞行路径
-//			for(Node node : set)
-//				System.out.print(node.getNodeID() + " ");
-//			System.out.println();
 			for (int i = 0; i < routeWithoutDepots.size(); i++) {
+				routeWithoutDepots.get(i).optimize();//对子路径进行优化
 				distance += routeWithoutDepots.get(i).getDistance();
 //				ArrayList<Node> route = routeWithoutDepots.get(i).getRoute();
 //				System.out.print("[");
@@ -711,6 +712,12 @@ public class timeclassifier {
 		System.out.println("总共距离 : " + distance);
 		System.out.println("总共时间 : " + totalTime);
 		System.out.println("平均时间 : " + totalTime / nodeSet.size());
+		
+		
+		
+		
+		
+		
 	}
 	
 	/**
@@ -817,7 +824,7 @@ public class timeclassifier {
              Set<RouteWithoutDepot> set1 = (Set<RouteWithoutDepot>) entry.getValue();
              double cost = 0;
              for (RouteWithoutDepot e : set1) {
-                 cost = cost + e.getDistance() / uavSpeed + chargingTime * e.getRoute().size();
+                 cost = cost + e.getDistance() / uavSpeed + chargingTime * (e.getRoute().size() - 1);
              }
              if(maxCost < cost)
              	maxCost = cost;

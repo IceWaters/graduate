@@ -1,6 +1,9 @@
 package nest.mdc.uav;
 import java.util.*;
 
+import nest.mdc.algorithm.NewTsp;
+import nest.mdc.algorithm.TspVersion2;
+import nest.mdc.network.CollectionNode;
 import nest.mdc.network.Node;
 import nest.mdc.network.Point;
 /**
@@ -74,11 +77,34 @@ public class RouteWithoutDepot implements Route{
         }
         return result;
     }
+    
+    /**
+     * 对路径用TSP算法进行进一步优化
+     */
+    public void optimize() {
+    	Set<CollectionNode> cNodes2 = new HashSet<>();
+		TspVersion2 tVersion2 = new TspVersion2(route, cNodes2);
+		NewTsp nTsp = new NewTsp(tVersion2.convertToTspNode());
+		ArrayList<Node> nList = new ArrayList<>();
+		nList = nTsp.startTsp();// 得到tsp运算后的结果
+		
+		double distance = 0;
+        if(nList.size() != 0){
+            for (int i = 0; i < nList.size() - 1; i++) {
+                distance = distance + nList.get(i).getDistance(nList.get(i + 1));
+            }
+            distance += nList.get(nList.size() - 1).getDistance(nList.get(0));
+        }
+        
+        if(distance < getDistance())
+        	route = nList;
+    }
 
     public double getCost() {
         setCost();//计算路径的代价
         return cost;
     }
+    
     public String toString(){
         String s="[";
         for(Node x:route){

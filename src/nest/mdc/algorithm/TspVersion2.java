@@ -2,6 +2,7 @@ package nest.mdc.algorithm;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import nest.mdc.network.CollectionNode;
@@ -17,7 +18,14 @@ public class TspVersion2{
 	public TspVersion2(Set nodeSet,Set collectionNodeSet){
 		this.nodeSet = nodeSet;
 		this.collectionNodeSet = collectionNodeSet;
-
+	}
+	
+	public TspVersion2(List<Node> nodeList,Set collectionNodeSet){
+		nodeSet = new HashSet<>();
+//		nodeSet.addAll(nodeList);
+		for(Node node : nodeList)
+			this.nodeSet.add(node);
+		this.collectionNodeSet = collectionNodeSet;
 	}
 	
 	/*

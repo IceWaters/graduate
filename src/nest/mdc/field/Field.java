@@ -28,8 +28,8 @@ import nest.mdc.timeclassifier.timeclassifier;
 public class Field extends JFrame {
 	public static int iNodeSum; // 网络中的节点数
 	public static int iMaxX, iMinX, iMaxY, iMinY; // 网络大小
-	public static int UAVCapacity;
-	public static int uavNumber;
+	public static int UAVCapacity;//无人机的飞行距离
+	public static int uavNumber;//无人机数量
 	public static Display display = null;
 	public static Display display2 = null;
 	private static Network network = null;
@@ -39,10 +39,11 @@ public class Field extends JFrame {
 	public static int weight1 = 1, weight2 = 1;
 	public static int clusterSize = 0;
 	public static int count = 0;
+	public static int period = 7;
     //工人的行进速度和无人机的飞行速度暂定一样
 	static {
 		// 基本网络参数
-		iNodeSum = 150;
+		iNodeSum = 250;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
@@ -50,6 +51,7 @@ public class Field extends JFrame {
 		Node.commRange = 300;
 		UAVCapacity = 2400;//须大于从基地到最远点的来回距离
 		uavNumber = 4;
+		period = 8;
 	}
 
 
@@ -252,17 +254,16 @@ public class Field extends JFrame {
 		rootNode = nodePool.getNodeWithID(0);		
 		timeclassifier timeclassifier1;
         //路由构造
-		MyRouting routing = new MyRouting(nodePool);
-		try {
-			field.drawChildren(display);
-			field.drawNodeId(display);
-			drawChargingPeriod(display,7);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-//		timeclassifier1.initialOriginalCluster();
+//		MyRouting routing = new MyRouting(nodePool);
+//		try {
+//			field.drawChildren(display);
+//			field.drawNodeId(display);
+//			drawChargingPeriod(display,7);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 //		timeclassifier1.runAlgXxxWithOneCharger();	
 		
 //		field.clearChildren();
@@ -274,11 +275,18 @@ public class Field extends JFrame {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runAlgXxxWithOneCharger();
-		
-		field.clearChildren();
+//		field.clearChildren();
 		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runMyAlgrWithUAV();
+		
+//		field.clearChildren();
+//		network.setChildrenNum();
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1.runMyAlgrWithUAV(0);
+		
+//		field.clearChildren();
+//		network.setChildrenNum();
 //		try {
 //			display2.clearPicture();
 //			field.drawChildren(display2);
@@ -288,13 +296,13 @@ public class Field extends JFrame {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 //		timeclassifier1.initialOriginalCluster();
 		//timeclassifier1.runMyAlgrWithUAV();
 		
-//		field.clearChildren();
-//		network.setChildrenNum();
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		field.clearChildren();
+		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
 		timeclassifier1.runAlgXxxWithOneCharger();
 		
 		//与多个充电工作者工作
