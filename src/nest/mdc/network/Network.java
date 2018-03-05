@@ -61,7 +61,7 @@ public class Network {
 		this.landforms = landforms;
 		// createHoleInNetwork(); //此方法能成功修改nodePool引用所指向的堆内存对象
 		// System.out.println(this.nodePool.getNodeSet().size());
-		initialWeightNetwork();
+		initialNetwork();
 		setChildrenNum();
 		// test();
 	}
@@ -240,6 +240,7 @@ public class Network {
 		int sourceID = startingNode.getNodeID(); // 得到起始点id
 		int nodeSum = nodePool.getNodeNum();
 		Set<Node> minNodeSets = new HashSet<Node>(); // 保存找到的最短路径点集合
+		minNodeSets.add(startingNode);
 		Node nextNode = startingNode; // 保存去startingNode节点最短路径的下一跳节点
 		// System.out.println(minNodeSets.size());
 		int[][] virtual_distanceMap = new int[nodeSum][nodeSum]; // 储存两点之间已知的最短路径距离和
@@ -317,7 +318,9 @@ public class Network {
 				if (xNode.neighbors.get(1).getNeig().contains(yNode)) { // 只有邻居才能通信
 					distanceMap2[i][j] = xNode.getDistance(yNode);
 					distanceMap[i][j] = 1;
-				} else {
+				} else if(i == j){
+					distanceMap[i][j] = 0;
+				}else{
 					distanceMap[i][j] = 10000; // 有distanceMap[i][i] = 10000
 				}
 
@@ -413,7 +416,7 @@ public class Network {
 		for (Node node : nodeSet) {
 			int num = findChildrenNum(node);
 			node.setChildrenNum(num);
-			node.setWeight(num);
+			node.setWeight(num + 1);
 		}
 	}
 

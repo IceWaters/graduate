@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -301,6 +302,13 @@ public class timeclassifier {
 				// clusterMap.put(kCluster, subCluster);
 			}
 		}
+		
+		for(Map.Entry<KCluster, ArrayList<KCluster>> entry : clusterMap.entrySet()) {
+			entry.getKey().printNodeId();
+			for(KCluster kCluster : entry.getValue())
+				kCluster.printNodeId();
+			System.out.println();
+		}
 	}
 
 	/**
@@ -376,7 +384,7 @@ public class timeclassifier {
 					} else {
 						kCluster.addTag();
 					}
-					if (kCluster.getTag() == Math.pow(2, index + 1)) {
+					if (kCluster.getTag() == (int)Math.pow(2, index + 1)) {
 						kCluster.setTag(0);
 					}
 				}
@@ -441,12 +449,7 @@ public class timeclassifier {
 				max = num;			
 		}
 
-
-		int m = (int) (Math.log(max) / Math.log((double) 2)) + 1; // 分类区间数目
-	//	m = 9;
-		int[] sort = new int[m];
-		for (int i = 0; i < m; i++)
-			sort[i] = 0;
+		int m = (int)Math.ceil(Math.log(max) / Math.log((double) 2)) + 1; // 分类区间数目
 
 		for (int i = 0; i < m; i++) {
 			// 初始化originalCluster
@@ -461,45 +464,41 @@ public class timeclassifier {
 			double pcr = node.getWeight(); // 耗电速率 power consumption rate
 			p.println(node.getNodeID() + "\t:\t" + pcr); // 打印节点ID 和 耗电速率
 
-			if (pcr >= min && pcr <= 1.0) {
+			if (pcr > min && pcr <= 1.0) {
 				// 当耗电速率在第一个区间内
 				originalCluster.get(m - 1).addNode(node);
 				node.setChargingPeriod((int) Math.pow(energyParameter, temp - 1));
-				sort[0]++;
 			} else {
 				// 循环求出耗电速率区间
 				for (int i = 1; i < m; i++) {
 					if (pcr > Math.pow(energyParameter, m - i - 1)
 							&& pcr <= Math.pow(energyParameter, m - i)) {
-						originalCluster.get(m - i - 1).addNode(node);
-						node.setChargingPeriod((int) Math.pow(energyParameter, temp - i - 1));
-						sort[i]++;
+						originalCluster.get(i - 1).addNode(node);
+						node.setChargingPeriod((int) Math.pow(energyParameter, temp - m + i - 1));
 						break;
 					}
 				}
 			}
 		}
 
-		
+		// 打印分类结果
+		System.out.println("\n分类结果：");
+		for (int i = 0; i < originalCluster.size() - 1; i++) {
+			System.out.println("(" + (double)Math.pow(energyParameter, m - i - 2) + ","
+					+ (double)  Math.pow(energyParameter, m - i - 1) + "] : "
+					+ originalCluster.get(m - i - 1).getNodeSet().size());
+		}
+		System.out.println("(0.0,1.0] : " + originalCluster.get(0).getNodeSet().size());
 
 		// 补充刚开始的几个空类，添加无用点
 		for (int i = 0; i < m; i++) {
 			KCluster cluster2 = originalCluster.get(i);
 			if (cluster2.getNodeSet().size() == 0) {
 				Node node2 = new Node(0, 0, 1000 + i);
-				// System.out.println((int)Math.pow(2,i));
 				node2.setChargingPeriod((int) Math.pow(2, i));
 				cluster2.addNode(node2);
 				originalCluster.set(i, cluster2);
 			}
-			// count++;
-		}
-		// 将分类结果打印在txt文档中
-		System.out.println("\n分类结果：");
-		for (int i = 0; i < originalCluster.size(); i++) {
-			System.out.println("(" + (double)Math.pow(energyParameter, m - i -1) + ","
-					+ (double)  Math.pow(energyParameter, m - i) + "] : "
-					+ originalCluster.get(m - i - 1).getNodeSet().size());
 		}
 						
 		if(originalCluster.size() != temp) {
@@ -518,32 +517,21 @@ public class timeclassifier {
 			originalCluster = tempCluster;
 			// 将分类结果打印在txt文档中
 			System.out.println("\n分类结果：");
-			for (int i = 0; i < originalCluster.size(); i++) {
-				System.out.println("(" + (double)Math.pow(energyParameter, temp - i -1) + ","
-						+ (double)  Math.pow(energyParameter, temp - i) + "] : "
+			for (int i = 0; i < originalCluster.size() - 1; i++) {
+				System.out.println("(" + (double)Math.pow(energyParameter, temp - i - 2) + ","
+						+ (double)  Math.pow(energyParameter, temp - i - 1) + "] : "
 						+ originalCluster.get(temp - i - 1).getNodeSet().size());
+				for(Node node : originalCluster.get(temp - i - 1).getNodeSet())
+					System.out.print(node.getNodeID() + " ");
+				System.out.println();
 			}
+			System.out.println("(0.0,1.0] : " + originalCluster.get(0).getNodeSet().size());
+			for(Node node : originalCluster.get(0).getNodeSet())
+				System.out.print(node.getNodeID() + " ");
+			System.out.println();
 		}
 		
-//		for (int i = 0; i < temp - m; i++) {
-//			KCluster clusterTemp = new KCluster();
-//			Node node2 = new Node(0, 0, 2000 + i);
-//			// System.out.println((int)Math.pow(2,i));
-//			node2.setChargingPeriod((int) Math.pow(2, i));
-//			clusterTemp.addNode(node2);
-//			originalCluster.add(0, clusterTemp);			
-//			// count++;
-//		}
-//		
-		
 		p.close();
-		// for (KCluster cluster : originalCluster) {
-		// for (Node node2 : cluster.getNodeSet()) {
-		// System.out.print(node2.getChildrenNum() + ":" +
-		// node2.getChargingPeriod() + " ");
-		// }
-		// System.out.println();
-		// }
 	}
 
 	/**
@@ -629,7 +617,7 @@ public class timeclassifier {
 	 * 
 	 * @throws FileNotFoundException
 	 */
-	public void runAlgXxxWithOneCharger() throws FileNotFoundException {
+	public double runAlgXxxWithOneCharger() throws FileNotFoundException {
 		initialOriginalCluster(); // 将节点按充电速率分为若干个大类
 		initClusterMap(); // 将大类分成小类，这里要注意对于不同的大类其分成小类的个数也不一样
 		ArrayList<Set<Node>> nodeSet = linkSubclass();// 调度算法，得到每天的充电节点的集合
@@ -643,6 +631,9 @@ public class timeclassifier {
 			if(set.size() == 0)
 				continue;
 			set.add(start);
+			for(Node node : set)
+				System.out.print(node.getNodeID() + " ");
+			System.out.println();
 			double totalTime = 0;
 			// 不进行聚类，直接所有点tsp运算，使用一个充电器充电
 			Set<CollectionNode> cNodes2 = new HashSet<>();
@@ -672,6 +663,8 @@ public class timeclassifier {
 		System.out.println("总共时间 : " + averageTime);
 		System.out.println("最大时间花费在第" + maxTimeDay + "天 为：" + maxTime);
 		System.out.println("averagetime :" + averageTime / nodeSet.size());
+		
+		return averageTime / nodeSet.size();
 	}
 	
 	public double runMyAlgrWithUAV() throws FileNotFoundException {

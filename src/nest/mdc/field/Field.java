@@ -44,15 +44,15 @@ public class Field extends JFrame {
     //工人的行进速度和无人机的飞行速度暂定一样
 	static {
 		// 基本网络参数
-		iNodeSum = 250;
+		iNodeSum = 20;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
 		iMinY = 0;
-		Node.commRange = 300;
+		Node.commRange = 600;
 		UAVCapacity = 2400;//须大于从基地到最远点的来回距离
 		uavNumber = 4;
-		period = 8;
+		period = 6;
 	}
 
 
@@ -174,7 +174,7 @@ public class Field extends JFrame {
 		for (Node node : nodePool.getNodeSet()) {
 			if (node.getNodeID() == 0)
 				continue;
-			int index = (int) (Math.log(node.getWeight()) / Math.log(2));		
+			int index = (int) Math.ceil(Math.log(node.getWeight()) / Math.log(2));		
 			display.drawPoint(node, size, aColors[index]);		
 		}
 	}
@@ -252,41 +252,41 @@ public class Field extends JFrame {
 		rootNode = nodePool.getNodeWithID(0);		
 		timeclassifier timeclassifier1;
         //路由构造
-		MyRouting routing = new MyRouting(nodePool);
-//		try {
-//			field.drawChildren(display);
-//			field.drawNodeId(display);
-//			drawChargingPeriod(display,7);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
+//		MyRouting routing = new MyRouting(nodePool);
+////		try {
+////			field.drawChildren(display);
+////			field.drawNodeId(display);
+////			drawChargingPeriod(display,7);
+////		} catch (IOException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+////		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+////		timeclassifier1.runAlgXxxWithOneCharger();	
+//		
+////		field.clearChildren();
+////		routing = new MyRouting(nodePool);
+////		try {
+////			field.drawChildren();
+////			field.drawNodeId();
+////		} catch (IOException e) {
+////			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+////		field.clearChildren();
+//		double minTime = 1000000;
+//		for(int i = 0; i < 0; i++) {
+//			nodePool.clearChildren();
+//			routing.run();
+//			timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+//			double time = timeclassifier1.runAlgXxxWithOneCharger();
+//			if(minTime > time) {
+//				minTime = time;
+//				routing.setParentChildren();				
+//			}
+//			System.out.println(minTime);
 //		}
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-//		timeclassifier1.runAlgXxxWithOneCharger();	
-		
-//		field.clearChildren();
-//		routing = new MyRouting(nodePool);
-//		try {
-//			field.drawChildren();
-//			field.drawNodeId();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		field.clearChildren();
-		double minTime = 1000000;
-		for(int i = 0; i < 10; i++) {
-			nodePool.clearChildren();
-			routing.run();
-			timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-			double time = timeclassifier1.runMyAlgrWithUAV();
-			if(minTime > time) {
-				minTime = time;
-				routing.setParentChildren();				
-			}
-			System.out.println(minTime);
-		}
-		
+//		
 //		field.clearChildren();
 //		network.setChildrenNum();
 //		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
@@ -307,10 +307,25 @@ public class Field extends JFrame {
 //		timeclassifier1.initialOriginalCluster();
 		//timeclassifier1.runMyAlgrWithUAV();
 		
-//		nodePool.clearChildren();
-//		network.setChildrenNum();
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-//		timeclassifier1.runAlgXxxWithOneCharger();
+		
+		System.out.println("\n\nthe old one:");
+		network.setChildrenNum();
+		try {
+		//	display2.clearPicture();
+			field.drawChildren(display);
+			field.drawNodeId(display);
+			drawChargingPeriod(display, 7);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runAlgXxxWithOneCharger();
+		
+		System.out.println("\n\nthe old one:");
+		network.setChildrenNum();
+		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+		timeclassifier1.runAlgXxxWithOneCharger();
 		
 
 //		field.clearChildren();

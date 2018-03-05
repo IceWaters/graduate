@@ -185,6 +185,16 @@ public class KCluster {
 		}
 		return test1;
 	}
+	
+	/**
+	 * 打印聚类里面的节点id
+	 */
+	public void printNodeId() {
+		System.out.print("[");
+		for(Node node : kCluster)
+			System.out.print(node.getNodeID() +" ");
+		System.out.print("]\n");
+	}
 
 	/**
 	 * 求2个节点的误差

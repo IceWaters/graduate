@@ -280,7 +280,6 @@ public class Node extends Point {
 	void findOneHopNeighbors(NodePool nodePool) {
 		// ArrayList nodeList = nodePool.getNodeList();
 		Iterator it = nodePool.getNodeList().iterator();
-
 		while (it.hasNext()) {
 			Node currentNode = (Node) it.next();
 			if (currentNode.getNodeID() != this.id) {
@@ -295,7 +294,6 @@ public class Node extends Point {
 				}
 			}
 		}
-
 	}
 
 	/**
