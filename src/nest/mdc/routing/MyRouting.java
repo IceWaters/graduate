@@ -70,12 +70,6 @@ public class MyRouting {
 							
 							//从不存在于S中的所有邻居点中，随意挑一个点作为子节点
 							double tempDistance = Network.distanceMap2[node.getNodeID()][neighbor.getNodeID()];
-//							//System.out.println("node : " + node.getNodeID() + " neighbor2 : " + neighbor.getNodeID() + " weight : " + weight + " distance : " + tempDistance);
-//							if(tempDistance < path.getDistance() || flag) {
-//								flag = false;
-//								path = new Path(node, neighbor, weight, tempDistance);		
-//							}
-							
 							path = new Path(node, neighbor, weight, tempDistance);
 							break;
 						}										

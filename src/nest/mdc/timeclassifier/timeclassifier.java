@@ -268,7 +268,6 @@ public class timeclassifier {
 	 * 将大类分成小类，这里要注意对于不同的大类根据充电周期其分成小类的个数也不一样
 	 */
 	public void initClusterMap() {
-		// test();
 		for (KCluster kCluster : originalCluster) {
 			int i;
 			if (kCluster.getRandomNode() == null) {
@@ -301,13 +300,6 @@ public class timeclassifier {
 				subCluster.addAll(temp);
 				// clusterMap.put(kCluster, subCluster);
 			}
-		}
-		
-		for(Map.Entry<KCluster, ArrayList<KCluster>> entry : clusterMap.entrySet()) {
-			entry.getKey().printNodeId();
-			for(KCluster kCluster : entry.getValue())
-				kCluster.printNodeId();
-			System.out.println();
 		}
 	}
 
@@ -370,8 +362,9 @@ public class timeclassifier {
 
 		for (int i = 0; i < maxPeriod; i++) {
 			Set<Node> scheduleDay = new HashSet<>();
-			KCluster tCluster = null;
+			
 			for (int index = 0; index < originalCluster.size() - 1; index++) {
+				KCluster tCluster = new KCluster(); 
 				if (clusterMap.get(originalCluster.get(index)).size() == 1) {
 					tCluster = clusterMap.get(originalCluster.get(index)).get(0);
 					scheduleDay.addAll(tCluster.getNodeSet());
@@ -521,16 +514,9 @@ public class timeclassifier {
 				System.out.println("(" + (double)Math.pow(energyParameter, temp - i - 2) + ","
 						+ (double)  Math.pow(energyParameter, temp - i - 1) + "] : "
 						+ originalCluster.get(temp - i - 1).getNodeSet().size());
-				for(Node node : originalCluster.get(temp - i - 1).getNodeSet())
-					System.out.print(node.getNodeID() + " ");
-				System.out.println();
 			}
 			System.out.println("(0.0,1.0] : " + originalCluster.get(0).getNodeSet().size());
-			for(Node node : originalCluster.get(0).getNodeSet())
-				System.out.print(node.getNodeID() + " ");
-			System.out.println();
 		}
-		
 		p.close();
 	}
 
@@ -628,6 +614,12 @@ public class timeclassifier {
 		int maxTimeDay = 0;
 		Node start = nodePool.getNodeWithID(0);
 		for (Set<Node> set : nodeSet) {
+			Set<Node> removeElements = new HashSet<>();
+			for (Node node : set) {
+				if (node.getNodeID() >= 1000)
+					removeElements.add(node);
+			}
+			set.removeAll(removeElements);
 			if(set.size() == 0)
 				continue;
 			set.add(start);
