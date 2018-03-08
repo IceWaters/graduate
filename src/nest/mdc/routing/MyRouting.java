@@ -50,9 +50,11 @@ public class MyRouting {
 						int expo = (int) (Math.log(tempWeight) / Math.log(2));						
 						if(Math.abs(Math.pow(2, expo) - tempWeight) < 0.0001) {
 							//再加一个子节点时，通信量正好是2的指数倍
-							weight += Math.pow(Field.iNodeSum * tempWeight, expo + 2);
+							weight += Math.pow(Field.iNodeSum * expo, 2);
+						}else if(Math.abs(Math.pow(2, expo) - tempWeight) < 1.0001) {
+							weight += Math.pow(Field.iNodeSum * expo, 3);
 						}else
-							weight += Math.pow(Math.abs(Field.iNodeSum * (tempWeight - Math.pow(2, expo)) / Math.pow(2, expo)), expo + 2);
+							weight += Math.pow(Math.abs(Field.iNodeSum * (tempWeight - Math.pow(2, expo)) / Math.pow(2, expo))* expo, 2);
 					}									
 					tempNode = tempNode.getParent();
 				}

@@ -28,10 +28,10 @@ public class Display extends JFrame {
 	/**    
 	 * 
 	 */
-	public Display(NodePool nodePool) {
+	public Display(NodePool nodePool, String str) {
 		// TODO Auto-generated constructor stub
 		// this.add(this.showNode(nodePool));
-		this.setTitle("MDC网络"); // 设置窗体名字
+		this.setTitle(str); // 设置窗体名字
 		this.setSize(950, 950); // 设置面板区域
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // 设置退出操作
 		drawPoint(nodePool, 4, Color.BLACK);

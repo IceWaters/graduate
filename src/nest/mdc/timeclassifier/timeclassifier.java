@@ -623,9 +623,9 @@ public class timeclassifier {
 			if(set.size() == 0)
 				continue;
 			set.add(start);
-			for(Node node : set)
-				System.out.print(node.getNodeID() + " ");
-			System.out.println();
+//			for(Node node : set)
+//				System.out.print(node.getNodeID() + " ");
+//			System.out.println();
 			double totalTime = 0;
 			// 不进行聚类，直接所有点tsp运算，使用一个充电器充电
 			Set<CollectionNode> cNodes2 = new HashSet<>();

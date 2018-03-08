@@ -42,15 +42,15 @@ public class Field extends JFrame {
     //工人的行进速度和无人机的飞行速度暂定一样
 	static {
 		// 基本网络参数
-		iNodeSum = 10;
+		iNodeSum = 70;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
 		iMinY = 0;
-		Node.commRange = 600;
+		Node.commRange = 300;
 		UAVCapacity = 2400;//须大于从基地到最远点的来回距离
 		uavNumber = 4;
-		period = 5;
+		period = 6;
 	}
 
 
@@ -62,8 +62,8 @@ public class Field extends JFrame {
 	Field() {
 		nodePool = new NodePool();
 		network = new Network(nodePool);
-		display = new Display(nodePool);
-//		display2 = new Display(nodePool);
+		display = new Display(nodePool, "1");
+		display2 = new Display(nodePool, "2");
 	}
 
 	void test() {
@@ -243,19 +243,30 @@ public class Field extends JFrame {
 		timeclassifier timeclassifier1;
         //路由构造
 		MyRouting routing = new MyRouting(nodePool);
-
+		routing.run();
 		double minTime = 1000000;
 		for(int i = 0; i < 10; i++) {
 			nodePool.clearChildren();
 			routing.run();
 			timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-			double time = timeclassifier1.runAlgXxxWithOneCharger();
+			double time = timeclassifier1.runMyAlgrWithUAV();
 			if(minTime > time) {
 				minTime = time;
 				routing.setParentChildren();				
 			}
 			System.out.println(minTime);
 		}		
+		routing.getParentChildren();
+		System.out.println("\n\nthe old one:");
+		try {
+			field.drawChildren(display2);
+			field.drawNodeId(display2);
+			drawChargingPeriod(display2, 7);
+			Thread.sleep(1000);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		System.out.println("\n\nthe old one:");
 		network.setChildrenNum();
@@ -268,7 +279,7 @@ public class Field extends JFrame {
 			e.printStackTrace();
 		}
 		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runAlgXxxWithOneCharger();
+		timeclassifier1.runMyAlgrWithUAV();
 		
 		
 
