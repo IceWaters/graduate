@@ -8,6 +8,8 @@ import java.util.Scanner;
 import java.util.Set;
 
 import javax.swing.JFrame;
+import javax.xml.parsers.DocumentBuilder;
+
 import nest.mdc.algorithm.Algorithm;
 import nest.mdc.algorithm.Tsp;
 import nest.mdc.cluster.KCluster;
@@ -42,7 +44,7 @@ public class Field extends JFrame {
     //工人的行进速度和无人机的飞行速度暂定一样
 	static {
 		// 基本网络参数
-		iNodeSum = 70;
+		iNodeSum = 500;
 		iMaxX = 800;
 		iMinX = 0;
 		iMaxY = 800;
@@ -50,7 +52,7 @@ public class Field extends JFrame {
 		Node.commRange = 300;
 		UAVCapacity = 2400;//须大于从基地到最远点的来回距离
 		uavNumber = 4;
-		period = 6;
+		period = 10;
 	}
 
 
@@ -62,8 +64,8 @@ public class Field extends JFrame {
 	Field() {
 		nodePool = new NodePool();
 		network = new Network(nodePool);
-		display = new Display(nodePool, "1");
-		display2 = new Display(nodePool, "2");
+//		display = new Display(nodePool, "1");
+//		display2 = new Display(nodePool, "2");
 	}
 
 	void test() {
@@ -158,14 +160,14 @@ public class Field extends JFrame {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Color[] aColors = { Color.BLACK, Color.yellow, Color.cyan, Color.red, Color.blue, Color.orange, Color.green,
-				Color.magenta, Color.pink, Color.darkGray };
+		Color[] aColors = { Color.BLACK, Color.red, Color.blue, Color.green,
+				Color.magenta, Color.orange, Color.pink, Color.darkGray};
 		display.drawPoint(rootNode, 2, aColors[0]);// the center point
 		for (Node node : nodePool.getNodeSet()) {
 			if (node.getNodeID() == 0)
 				continue;
 			int index = (int) Math.ceil(Math.log(node.getWeight()) / Math.log(2));		
-			display.drawPoint(node, size, aColors[index]);		
+			display.drawPoint(node, size + index * 3, aColors[index]);		
 		}
 	}
 	
@@ -237,57 +239,62 @@ public class Field extends JFrame {
 	 * @throws InterruptedException
 	 */
 	public static void main(String[] args) throws FileNotFoundException, InterruptedException {
-		Field field = new Field();
-		System.out.println(nodePool.getNodeNum());
-		rootNode = nodePool.getNodeWithID(0);		
-		timeclassifier timeclassifier1;
-        //路由构造
-		MyRouting routing = new MyRouting(nodePool);
-		routing.run();
-		double minTime = 1000000;
-		for(int i = 0; i < 10; i++) {
-			nodePool.clearChildren();
+		double time1 = 0;
+		double time2 = 0;
+		for(int j = 0; j < 20; j++) {
+			Field field = new Field();
+			System.out.println(nodePool.getNodeNum());
+			rootNode = nodePool.getNodeWithID(0);		
+			timeclassifier timeclassifier1;
+	        //路由构造
+			MyRouting routing = new MyRouting(nodePool);
 			routing.run();
+			double minTime = 1000000;
+			for(int i = 0; i < 10; i++) {
+				nodePool.clearChildren();
+				routing.run();
+				timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+				double time = timeclassifier1.runMyAlgrWithUAV();
+				if(minTime > time) {
+					minTime = time;
+					routing.setParentChildren();				
+				}
+				System.out.println(minTime);
+			}	
+			time1 += minTime;
+			routing.getParentChildren();
+	//		try {
+	//			field.drawChildren(display2);
+	//		//	field.drawNodeId(display2);
+	//			drawChargingPeriod(display2, 4);
+	//			Thread.sleep(1000);
+	//		} catch (Exception e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
+			
+			System.out.println("\n\nthe old one:");
+			network.setChildrenNum();
+	//		try {
+	//			field.drawChildren(display);
+	//		//	field.drawNodeId(display);
+	//			drawChargingPeriod(display, 4);
+	//		} catch (Exception e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//		}
 			timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-			double time = timeclassifier1.runMyAlgrWithUAV();
-			if(minTime > time) {
-				minTime = time;
-				routing.setParentChildren();				
-			}
-			System.out.println(minTime);
-		}		
-		routing.getParentChildren();
-		System.out.println("\n\nthe old one:");
-		try {
-			field.drawChildren(display2);
-			field.drawNodeId(display2);
-			drawChargingPeriod(display2, 7);
-			Thread.sleep(1000);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			time2 += timeclassifier1.runMyAlgrWithUAV();
+			
+			
+	
+	//		field.clearChildren();
+	//		network.setChildrenNum();
+	//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
+	//		timeclassifier1.runAlgXXX();
 		}
-		
-		System.out.println("\n\nthe old one:");
-		network.setChildrenNum();
-		try {
-			field.drawChildren(display);
-			field.drawNodeId(display);
-			drawChargingPeriod(display, 7);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-		timeclassifier1.runMyAlgrWithUAV();
-		
-		
-
-//		field.clearChildren();
-//		network.setChildrenNum();
-//		timeclassifier1 = new timeclassifier(nodePool.getNodeList(), nodePool);
-//		timeclassifier1.runAlgXXX();
-		
+		System.out.println("time1 : " + time1 + " " + time1 / 20);
+		System.out.println("time2 : " + time2 + " " + time2 / 20);
 	}
 }
 
